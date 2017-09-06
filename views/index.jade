@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h1= title
+  h3 フィーチャ サービス
+
+  each val, index in featureService
+   h3 Feature Service : #{index + 1}件
+   p id : #{val.id}
+   p owner: #{val.owner}
+   p title: #{val.title}
+   p type: #{val.type}
+   p url: #{val.url}
+   p access: #{val.access}
+
+  

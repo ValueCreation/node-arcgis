@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1= title
+  h3 ArcGIS アイテムの詳細
+
+  p name: #{item.name}
+  p title: #{item.title}
+  p description: #{item.description}
+  p snippet: #{item.snippet}  
+  p spatialReference: #{item.spatialReference}    
+  p extent: #{item.extent}
+  p url: #{item.url}
+  p size: #{item.size}  
+  

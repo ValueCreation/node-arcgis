@@ -2,21 +2,21 @@ var express = require('express');
 
 var router = express.Router();
 
-var arcgis = require('arcgis')
-var ago = arcgis({token: 'DNmU7F14x-L1dBRn98z_e-lObJ2jpELB_7kGm5tPK7gGFizwIfd1ppLa9MQ7V_XZdexDh1X0SER8UmuvMDmvGLg2uwYvlxefoR3Xnd2Uua_bk7EZMHZuf60qOh7OmbCa'});
+var arcgis = require('arcgis');
+var ago = arcgis({token: 'mJtknwSbSAtfnnUNj8UNqhwMVFxrH5jH4zzX_jbCM2rDFfsEI0kVDpoLch_SU9KEGJJv1-qAmjcUprAVt2RJ7W_6YjwIxK6tLqye3BiP-EiqopWL8XgDL5qGdzhnIbc4NM-5RgM7_qA9igxkyQCumA..'});
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
   var options = {
-    queryString: 'owner:kamiya AND (type:"Feature Service")',
+    queryString: 'owner:esri AND (type:"Feature Service")',
     num: 10
   };
   
   ago.search(options)
     .then(function(result) {
       console.log(result.results)
-      res.render('index', { title: 'ArcGIS', featureService: result.results});
+      res.render('index', { title: 'Node ArcGIS', featureService: result.results});
   });
 
 });
@@ -26,9 +26,9 @@ router.get('/item/:id', function(req, res, next) {
   var itemId = req.params.id;
   
   ago.item(itemId)
-    .then(function(result) {
-      console.log(result)
-      res.render('item', { title: 'ArcGIS', item: result });
+    .then(function(item) {
+      console.log(item)
+      res.render('item', { title: 'Node ArcGIS', item: item });
   });
     
 });

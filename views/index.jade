@@ -2,7 +2,6 @@ extends layout
 
 block content
   h1= title
-  h3 フィーチャ サービス
 
   each val, index in featureService
    h3 Feature Service : #{index + 1}件
@@ -12,5 +11,6 @@ block content
    p type: #{val.type}
    p url: #{val.url}
    p access: #{val.access}
+   <br/>
 
   

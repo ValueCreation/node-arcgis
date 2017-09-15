@@ -6,50 +6,66 @@ var router = express.Router();
 var arcgis = require('arcgis');
 var ago = arcgis({token: 'mJtknwSbSAtfnnUNj8UNqhwMVFxrH5jH4zzX_jbCM2rDFfsEI0kVDpoLch_SU9KEGJJv1-qAmjcUprAVt2RJ7W_6YjwIxK6tLqye3BiP-EiqopWL8XgDL5qGdzhnIbc4NM-5RgM7_qA9igxkyQCumA..'});
 
-request.get({
-  url: 'https://connpass.com/api/v1/event/',
-  json: true,  
-  qs: {
-    "keyword": "python"
-  }
-}, function(error, response, body) {
-  console.log(response.statusCode);
-  if (!error && response.statusCode == 200) {
-    console.log(response.statusCode);
-    console.log(body.results_returned);
-    console.log(body.events);
-    
-  }
+var keyword = "python";
 
-});
-
-
-var requestData = {
-  "geometry" : { "x" : 139.737964100000, "y" : 35.66420310000 },
-  "attributes" : {
-      "event_id" : 508389,
-      "lat" : 35.664203100000,
-      "lon" : 139.737964100000
-  }
+var options = {
+  "keyword" : keyword,
+  "keyword" : "東京",
+  "count": "100"
 };
 
-var connpass = [];
+var ary_connpass = [];      
 
-connpass.push(requestData);
-console.log(connpass);
-/*
-request.post({
-  url: 'https://services.arcgis.com/wlVTGRSYTzAbjjiC/arcgis/rest/services/connpass/FeatureServer/0/applyEdits',
-  headers: {'content-type': 'application/x-www-form-urlencoded'},
-  form: {
-    'f': 'json',
-    'adds': JSON.stringify(connpass)
-  }
-}, function(error, response, body) {
-  //console.log(response);
-  console.log(body);
+var connpass = require("connpass");
+connpass.get(options)
+.then((events)=>{
+  console.log(events.results_returned);
+  console.log(events.events);
+  
+  events.events.forEach(function(val, index, ar) {
+    if (val.lon != null && val.lat != null) {
+      var requestData = {
+        "geometry" : { "x" : val.lon, "y" : val.lat },
+        "attributes" : {
+            "event_id" : val.event_id,
+            "title" : val.title,
+            "catch" : val.catch,
+            "event_url" : val.event_url,
+ //           "description" : val.description,
+            "hash_tag" : val.hash_tag,
+            "started_at" : val.started_at,
+            "ended_at" : val.ended_at,
+            "limit" : val.limit,
+            "address" : val.address,
+            "place" : val.place,
+            "keyword" : keyword,
+            "lat" :  val.lat,
+            "lon" :  val.lon
+        }
+      };
+      
+      ary_connpass.push(requestData);
+    }
+  });
+
+  console.log(ary_connpass);
+
+  request.post({
+    url: 'https://services.arcgis.com/wlVTGRSYTzAbjjiC/arcgis/rest/services/connpass/FeatureServer/0/applyEdits',
+    headers: {'content-type': 'application/x-www-form-urlencoded'},
+    form: {
+      'f': 'json',
+      'adds': JSON.stringify(ary_connpass)
+    }
+  }, function(error, response, body) {
+    //console.log(response);
+    console.log(body);
+  });
+
+})
+.catch((error)=>{
+  console.log(error);
 });
-*/
 
 /*
 request.post({
@@ -93,6 +109,28 @@ router.get('/item/:id', function(req, res, next) {
       res.render('item', { title: 'Node ArcGIS', item: item });
   });
     
+});
+
+router.get('/connpass', function(req, res, next) {
+
+  request.get({
+      url: 'https://connpass.com/api/v1/event/',
+      json: true,  
+      qs: {
+        "keyword": "python"
+      }
+    }, function(error, response, body) {
+      console.log(response.statusCode);
+      if (!error && response.statusCode == 200) {
+        console.log(response.statusCode);
+        console.log(body.results_returned);
+        console.log(body.events);
+        
+      }
+
+    });
+
+    res.send('respond with a resource');
 });
 
 module.exports = router;

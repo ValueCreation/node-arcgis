@@ -6,12 +6,20 @@ var router = express.Router();
 var arcgis = require('arcgis');
 var ago = arcgis({token: 'mJtknwSbSAtfnnUNj8UNqhwMVFxrH5jH4zzX_jbCM2rDFfsEI0kVDpoLch_SU9KEGJJv1-qAmjcUprAVt2RJ7W_6YjwIxK6tLqye3BiP-EiqopWL8XgDL5qGdzhnIbc4NM-5RgM7_qA9igxkyQCumA..'});
 
-var keyword = "python";
+var keyword = "Ruby";
+
+// Ruby
+// PHP
+// Java
+// C#
+// Python
+// JavaScript
+// 
 
 var options = {
   "keyword" : keyword,
-  "keyword" : "東京",
-  "count": "100"
+//  "keyword" : "東京",
+  "count": "1000"
 };
 
 var ary_connpass = [];      
@@ -25,7 +33,7 @@ connpass.get(options)
   events.events.forEach(function(val, index, ar) {
     if (val.lon != null && val.lat != null) {
       var requestData = {
-        "geometry" : { "x" : val.lon, "y" : val.lat },
+        "geometry" : { "x" : val.lon, "y" : val.lat, "spatialReference" : {"wkid" : 4326} },
         "attributes" : {
             "event_id" : val.event_id,
             "title" : val.title,
@@ -38,6 +46,8 @@ connpass.get(options)
             "limit" : val.limit,
             "address" : val.address,
             "place" : val.place,
+            "accepted": val.accepted,
+            "waiting": val.waiting,
             "keyword" : keyword,
             "lat" :  val.lat,
             "lon" :  val.lon
@@ -49,7 +59,7 @@ connpass.get(options)
   });
 
   console.log(ary_connpass);
-
+  
   request.post({
     url: 'https://services.arcgis.com/wlVTGRSYTzAbjjiC/arcgis/rest/services/connpass/FeatureServer/0/applyEdits',
     headers: {'content-type': 'application/x-www-form-urlencoded'},
@@ -61,6 +71,7 @@ connpass.get(options)
     //console.log(response);
     console.log(body);
   });
+
 
 })
 .catch((error)=>{

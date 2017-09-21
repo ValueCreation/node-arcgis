@@ -1,12 +1,13 @@
 var express = require('express');
 var request = require('request');
+var connpass = require("connpass");
 
 var router = express.Router();
 
 var arcgis = require('arcgis');
 var ago = arcgis({token: 'mJtknwSbSAtfnnUNj8UNqhwMVFxrH5jH4zzX_jbCM2rDFfsEI0kVDpoLch_SU9KEGJJv1-qAmjcUprAVt2RJ7W_6YjwIxK6tLqye3BiP-EiqopWL8XgDL5qGdzhnIbc4NM-5RgM7_qA9igxkyQCumA..'});
 
-var keyword = "Ruby";
+var keywords = ['Ruby', 'PHP', 'Java', 'C#', 'Python', 'JavaScript'];
 
 // Ruby
 // PHP
@@ -16,30 +17,58 @@ var keyword = "Ruby";
 // JavaScript
 // 
 
-var options = {
-  "keyword" : keyword,
-//  "keyword" : "東京",
-  "count": "1000"
+delArcGISOnline(keywords);
+
+function delArcGISOnline(keywords) {
+
+  keywords.forEach(function(val, index, ar) {
+    
+    console.log(val);
+    var where = "keyword='" + val + "'";
+    console.log(where);
+    request.post({
+      url: 'https://services.arcgis.com/wlVTGRSYTzAbjjiC/arcgis/rest/services/connpass/FeatureServer/0/deleteFeatures',
+      headers: {'content-type': 'application/x-www-form-urlencoded'},
+      form: {
+        'f': 'json',
+        'where': "keyword='" + val + "'" 
+      }
+    }, function(error, response, body) {
+      console.log(body);
+    });
+    
+  });
+
 };
 
-var ary_connpass = [];      
+var keywordCnt = 0;
 
-var connpass = require("connpass");
-connpass.get(options)
-.then((events)=>{
-  console.log(events.results_returned);
-  console.log(events.events);
+console.log(keywords.length);
+getConnpassData(keywords[0]);
+
+function getConnpassData(keyword) {
   
-  events.events.forEach(function(val, index, ar) {
-    if (val.lon != null && val.lat != null) {
-      var requestData = {
-        "geometry" : { "x" : val.lon, "y" : val.lat, "spatialReference" : {"wkid" : 4326} },
-        "attributes" : {
+  var ary_connpass = [];  
+
+  var options = {
+    "keyword" : keyword,
+    "keyword" : "東京",
+    "count": "100"
+  };
+
+  connpass.get(options).then((events) => {
+    console.log(events.results_returned);
+    console.log(events.events); 
+    events.events.forEach(function(val, index, ar) {
+      if (val.lon != null && val.lat != null) {
+        var requestData = {
+          "geometry" : { "x" : val.lon, "y" : val.lat, "spatialReference" : {"wkid" : 4326} },
+          "attributes" : {
             "event_id" : val.event_id,
             "title" : val.title,
             "catch" : val.catch,
             "event_url" : val.event_url,
- //           "description" : val.description,
+            //"description" : val.description,
             "hash_tag" : val.hash_tag,
             "started_at" : val.started_at,
             "ended_at" : val.ended_at,
@@ -51,15 +80,22 @@ connpass.get(options)
             "keyword" : keyword,
             "lat" :  val.lat,
             "lon" :  val.lon
-        }
-      };
-      
-      ary_connpass.push(requestData);
-    }
-  });
+          }
+        };
+        ary_connpass.push(requestData);
+      }
+    });
+    
+    //console.log(ary_connpass);
+    addArcGISOnline(ary_connpass);
 
-  console.log(ary_connpass);
-  
+  }).catch((error)=>{
+    console.log(error);
+  });  
+};
+
+function addArcGISOnline(ary_connpass) {
+    
   request.post({
     url: 'https://services.arcgis.com/wlVTGRSYTzAbjjiC/arcgis/rest/services/connpass/FeatureServer/0/applyEdits',
     headers: {'content-type': 'application/x-www-form-urlencoded'},
@@ -70,13 +106,14 @@ connpass.get(options)
   }, function(error, response, body) {
     //console.log(response);
     console.log(body);
+    keywordCnt++;   
+    if (keywordCnt < keywords.length) {
+      getConnpassData(keywords[keywordCnt]);
+    };
+
   });
 
-
-})
-.catch((error)=>{
-  console.log(error);
-});
+}
 
 /*
 request.post({
